@@ -1,9 +1,16 @@
 import MainDashboard from "./components/dashboard/main-dashboard";
+import HeaderControl from "./components/header/header-control";
 
 function App(): React.JSX.Element {
   return (
-    <div className="bg-background min-h-screen">
-      <MainDashboard />
+    <div className="h-screen flex flex-col overflow-hidden bg-background">
+      {/* Header fixo */}
+      <HeaderControl />
+
+      {/* Conteúdo rolável abaixo do header */}
+      <main className="flex-1 overflow-y-auto pt-12">
+        <MainDashboard />
+      </main>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { X as XIcon } from "lucide-react";
 import { useCustomHeader } from "./hooks/useCustomHeader";
 
 const ControlButtons: React.FC = () => {
@@ -27,7 +28,7 @@ const ControlButtons: React.FC = () => {
         className="w-11 h-7 flex items-center justify-center ml-1 rounded cursor-pointer bg-transparent text-white transition-colors duration-200 hover:bg-[#FF0000]"
         onClick={handleClose}
       >
-        ×
+        <XIcon size={18} />
       </button>
     </div>
   );

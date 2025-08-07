@@ -2,20 +2,21 @@ import { app, shell, BrowserWindow, globalShortcut } from "electron";
 import { join } from "path";
 import { electronApp, is, optimizer } from "@electron-toolkit/utils";
 import * as path from "path";
-//import * as fs from "fs";
+import * as fs from "fs";
 import * as dotenv from "dotenv";
 import { registerControlButtons, registerSearchHandler } from "./ipcHandler";
 const envPath = path.join(process.cwd(), ".env");
 dotenv.config({ path: envPath });
 
-//const assetsDir = path.join(__dirname, '../renderer/src/assets')
-//const icoFile = fs.readdirSync(assetsDir).find((file) => file.endsWith('.ico'))
-//const iconPath = icoFile ? path.join(assetsDir, icoFile) : undefined
+//TODO AJEITAR ICON
+const assetsDir = path.join(__dirname, '../renderer/assets');
+const icoFile = fs.readdirSync(assetsDir).find((file) => file.endsWith('.ico'));
+const iconPath = icoFile ? path.join(assetsDir, icoFile) : undefined;
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
-    title: "Ctrl+AI",
-    //  icon: iconPath,
+    title: "Youtub Music Downloader",
+    icon: iconPath || undefined,
     width: 900,
     height: 670,
     show: false,

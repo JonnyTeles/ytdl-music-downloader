@@ -2,7 +2,6 @@ const globals = require("globals");
 const tsPlugin = require("@typescript-eslint/eslint-plugin");
 const tsParser = require("@typescript-eslint/parser");
 const react = require("eslint-plugin-react");
-const prettier = require("eslint-plugin-prettier");
 const reactHooks = require("eslint-plugin-react-hooks");
 
 module.exports = [
@@ -18,7 +17,6 @@ module.exports = [
     },
     plugins: {
       react,
-      prettier,
       "@typescript-eslint": tsPlugin,
       "react-hooks": reactHooks,
     },
@@ -29,7 +27,6 @@ module.exports = [
     },
     rules: {
       semi: ["error", "always"],
-      "prettier/prettier": ["error", { semi: true }],
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
       "react-hooks/rules-of-hooks": "error",

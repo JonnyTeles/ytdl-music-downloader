@@ -1,16 +1,19 @@
 import { useState } from "react";
-import { useSearch } from "./search-context";
-import { Search as SearchIcon, X } from "lucide-react";
+import { useSearch } from "./context/search-context";
+import { Search as SearchIcon, X as XIcon } from "lucide-react";
 import Loading from "./loading";
+import { useToast } from "../toast/toast-context";
 
 const Search: React.FC = () => {
+  //TODO: MOVER PRA UM HOOK
   const [query, setQuery] = useState("");
   const { setResults } = useSearch();
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const { showToast } = useToast();
 
   const search = async () => {
-    if (!query.trim()) return; //TODO: ADICIONAR SNACKBAR
+    if (!query.trim()) return;
     try {
       setLoading(true);
       setProgress(0);
@@ -29,8 +32,14 @@ const Search: React.FC = () => {
         clearInterval(progressInterval);
         setProgress(100);
         setTimeout(() => {
-          if (data?.items) {
-            setResults(data.items);
+          if (data?.items) setResults(data.items);
+          if (!data?.items.length) {
+            showToast({
+              title: "Erro",
+              message: "Nenhum vídeo encontrado",
+              type: "error",
+              closable: true,
+            });
           }
           setLoading(false);
           setProgress(0);
@@ -40,6 +49,12 @@ const Search: React.FC = () => {
       console.error(err);
       setLoading(false);
       setProgress(0);
+      showToast({
+        title: "Erro",
+        message: "Ocorreu um erro ao pesquisar pelo vídeo",
+        type: "error",
+        closable: true,
+      });
     }
   };
 
@@ -55,13 +70,13 @@ const Search: React.FC = () => {
   };
 
   return (
-    <div className="w-full p-2">
+    <div className="w-full p-2 -mt-10">
       <div className="flex items-center relative">
         <div className="relative flex-1">
           <input
             type="text"
             value={query}
-            placeholder="Nome ou Link do vídeo" //TODO: MELHORAR NOME DISSO
+            placeholder="Pesquisar vídeo"
             className="w-full bg-primary text-white px-4 py-2 rounded-l-full border border-gray-600 focus:outline-none focus:border-redytb pr-10"
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -71,7 +86,7 @@ const Search: React.FC = () => {
               onClick={clearSearch}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
             >
-              <X size={18} />
+              <XIcon size={18} />
             </button>
           )}
         </div>

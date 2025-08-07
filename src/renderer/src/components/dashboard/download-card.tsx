@@ -1,12 +1,13 @@
+import ResultsCard from "./results-card";
 import Search from "./search";
-import { SearchProvider } from "./search-context";
 import SelectedCard from "./selected-card";
 
 const DownloadCard: React.FC = () => (
-  <SearchProvider>
+  <div>
     <Search />
+    <ResultsCard />
     <SelectedCard />
-  </SearchProvider>
+  </div>
 );
 
 export default DownloadCard;

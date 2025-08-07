@@ -1,10 +1,10 @@
 import React, { createContext, useState, ReactNode, useContext } from "react";
-import { VideoItem } from "../../../../types/videoItem";
+import { VideoItem } from "../../../../../types/videoItem";
 
-interface SearchContextType {
+type SearchContextType = {
   results: VideoItem[];
   setResults: React.Dispatch<React.SetStateAction<VideoItem[]>>;
-}
+};
 
 const SearchContext = createContext<SearchContextType | undefined>(undefined);
 
