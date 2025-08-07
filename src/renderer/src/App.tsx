@@ -4,10 +4,7 @@ import HeaderControl from "./components/header/header-control";
 function App(): React.JSX.Element {
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-background">
-      {/* Header fixo */}
       <HeaderControl />
-
-      {/* Conteúdo rolável abaixo do header */}
       <main className="flex-1 overflow-y-auto pt-12">
         <MainDashboard />
       </main>

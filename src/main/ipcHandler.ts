@@ -1,5 +1,7 @@
 import { BrowserWindow, ipcMain } from "electron";
 import youtubesearchapi from "youtube-search-api";
+import { apiSearchType } from '../types/apiSearchType';
+import { extractPlaylistId } from "./utils";
 
 export function registerControlButtons() {
   ipcMain.handle("window-minimize", (event) => {
@@ -22,8 +24,16 @@ export function registerControlButtons() {
 }
 
 export function registerSearchHandler() {
-  ipcMain.handle("search", async (_event, title: string) => {
-    const data = await youtubesearchapi.GetListByKeyword(title, false, 10, [{ type: "video" }]);
-    return data;
+  ipcMain.handle("search", async (_event, payload: apiSearchType) => {
+    const { query, type } = payload;
+    if (type === 'name') {
+      return await youtubesearchapi.GetListByKeyword(query, false, 500, [{ type: "video" }]);
+    } else if (type === 'playlist') {
+      const playlistId = extractPlaylistId(query);
+      return await youtubesearchapi.GetPlaylistData(playlistId, 500);
+    } else {
+      throw new Error(`Invalid search type: ${type}`);
+    }
   });
+
 }

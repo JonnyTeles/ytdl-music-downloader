@@ -1,4 +1,5 @@
-export {};
+import { apiSearchType } from './types/apiSearchType';
+export { };
 
 declare global {
   interface Window {
@@ -6,7 +7,7 @@ declare global {
       minimize: () => Promise<void>;
       maximize: () => Promise<void>;
       close: () => Promise<void>;
-      search: (title: string) => Promise<any>;
+      search: (apiSearchType: apiSearchType) => Promise<any>;
     };
   }
 }

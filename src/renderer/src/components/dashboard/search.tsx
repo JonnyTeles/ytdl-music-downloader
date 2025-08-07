@@ -23,7 +23,9 @@ const Search: React.FC = () => {
       }, 100);
 
       const startTime = Date.now();
-      const data = await window.electronAPI.search(query);
+      const type =
+        query.startsWith("http://") || query.startsWith("https://") ? "playlist" : "name";
+      const data = await window.electronAPI.search({ query, type });
 
       const elapsed = Date.now() - startTime;
       const delay = Math.max(0, 1000 - elapsed);

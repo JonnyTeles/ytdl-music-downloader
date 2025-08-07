@@ -5,8 +5,10 @@ import SelectedCard from "./selected-card";
 const DownloadCard: React.FC = () => (
   <div>
     <Search />
-    <ResultsCard />
-    <SelectedCard />
+    <div className="flex gap-x-4">
+      <ResultsCard />
+      <SelectedCard />
+    </div>
   </div>
 );
 
