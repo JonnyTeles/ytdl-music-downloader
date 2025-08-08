@@ -2,9 +2,10 @@ import { BrowserWindow, ipcMain } from "electron";
 import youtubesearchapi from "youtube-search-api";
 import { apiSearchType } from '../types/apiSearchType';
 import { extractPlaylistId } from "./utils";
+import { downloadInWorker } from "./worker/downloadManager";
 
 export function registerControlButtons() {
-  ipcMain.handle("window-minimize", (event) => {
+  ipcMain.handle("window-minimize", async (event) => {
     const win = BrowserWindow.fromWebContents(event.sender);
     if (win) win.minimize();
   });
@@ -35,5 +36,19 @@ export function registerSearchHandler() {
       throw new Error(`Invalid search type: ${type}`);
     }
   });
-
+}
+export function downloadHandler() {
+  ipcMain.handle("download", async (_event, links: string[]) => {
+    try {
+      for (const link of links) {
+        await downloadInWorker(link);
+      }
+      return { success: true };
+    } catch (err: any) {
+      console.error(err);
+      if (err.message.includes("Output file already exists"))
+        throw new Error("$(music) já foi baixada.");
+      throw new Error("Falha ao baixar músicas.");
+    }
+  });
 }

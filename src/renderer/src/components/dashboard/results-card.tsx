@@ -1,7 +1,7 @@
 import { VideoItem } from "src/types/videoItem";
 import { useSearch } from "./context/search-context";
 import { useSelected } from "./context/selected-context";
-import { Download as DownloadIcon, FileDownIcon } from "lucide-react";
+import { CornerDownRight as CornerDownRightIcon, FileDownIcon } from "lucide-react";
 import { useToast } from "../toast/toast-context";
 
 const ResultsCard: React.FC = () => {
@@ -73,7 +73,7 @@ const ResultsCard: React.FC = () => {
             className="w-32 h-auto rounded"
           />
           <span className="text-white">{video.title}</span>
-          <DownloadIcon
+          <CornerDownRightIcon
             size={18}
             color="#fff"
             className="hover:cursor-pointer"

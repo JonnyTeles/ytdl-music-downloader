@@ -6,7 +6,9 @@
     "src/renderer/src/**/*.tsx",
     "src/preload/*.d.ts",
     "src/**/*.ts",
-    "src/**/*.tsx"
+    "src/**/*.tsx",
+    "src/main/worker/downloadManager.js",
+    "src/main/worker/worker.ts"
   ],
   "compilerOptions": {
     "composite": true,

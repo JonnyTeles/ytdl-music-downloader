@@ -4,14 +4,16 @@ import { electronApp, is, optimizer } from "@electron-toolkit/utils";
 import * as path from "path";
 import * as fs from "fs";
 import * as dotenv from "dotenv";
-import { registerControlButtons, registerSearchHandler } from "./ipcHandler";
+import { downloadHandler, registerControlButtons, registerSearchHandler } from "./ipcHandler";
 const envPath = path.join(process.cwd(), ".env");
 dotenv.config({ path: envPath });
+process.env.YTDL_NO_UPDATE = '1';
 
 //TODO AJEITAR ICON
 const assetsDir = path.join(__dirname, '../renderer/assets');
 const icoFile = fs.readdirSync(assetsDir).find((file) => file.endsWith('.ico'));
 const iconPath = icoFile ? path.join(assetsDir, icoFile) : undefined;
+const downloadFolder = path.join(__dirname, 'Musics');
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -52,6 +54,7 @@ app.whenReady().then(() => {
   createWindow();
   registerControlButtons();
   registerSearchHandler();
+  downloadHandler();
 
   app.on("activate", function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -65,6 +68,12 @@ app.on("will-quit", () => {
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
+  }
+});
+
+app.on("ready", () => {
+  if (!fs.existsSync(downloadFolder)) {
+    fs.mkdirSync(downloadFolder, { recursive: true });
   }
 });
 

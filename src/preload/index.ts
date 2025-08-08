@@ -6,4 +6,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
   maximize: () => ipcRenderer.invoke("window-maximize"),
   close: () => ipcRenderer.invoke("window-close"),
   search: (apiSearchType: apiSearchType) => ipcRenderer.invoke("search", apiSearchType),
+  download: (link: string[]) => ipcRenderer.invoke("download", link)
 });
