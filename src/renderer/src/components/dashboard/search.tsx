@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useSearch } from "./context/search-context";
 import { Search as SearchIcon, X as XIcon } from "lucide-react";
-import Loading from "./loading";
 import { useToast } from "../toast/toast-context";
+import ProgressBar from "./ProgressBar";
 
 const Search: React.FC = () => {
   //TODO: MOVER PRA UM HOOK
@@ -99,7 +99,7 @@ const Search: React.FC = () => {
           <SearchIcon size={24} color="#fff" />
         </button>
       </div>
-      {loading && <Loading progress={progress} />}
+      {loading && <ProgressBar progress={progress} />}
     </div>
   );
 };

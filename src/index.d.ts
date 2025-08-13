@@ -1,4 +1,4 @@
-import { apiSearchType } from './types/apiSearchType';
+import { apiSearchType } from "./types/apiSearchType";
 export { };
 
 declare global {
@@ -9,6 +9,8 @@ declare global {
       close: () => Promise<void>;
       search: (apiSearchType: apiSearchType) => Promise<any>;
       download: (link: string[]) => Promise<any>;
+      selectFolder: () => Promise<string>;
+      getFolderPath: () => Promise<string>;
     };
   }
 }

@@ -7,10 +7,13 @@ import {
 import { useSelected } from "./context/selected-context";
 import { VideoItem } from "src/types/videoItem";
 import { useToast } from "../toast/toast-context";
-
+import { useLoading } from "../loading/loading-context";
+//TODO CRIAR HOOK PRA ORGANIZAR
 const SelectedCard: React.FC = () => {
   const { selected, setSelected } = useSelected();
   const { showToast } = useToast();
+  const { setLoading } = useLoading();
+
   const handleExclude = (video: VideoItem) => {
     setSelected((prevSelected) => prevSelected.filter((v) => v.id !== video.id));
     showToast({
@@ -25,26 +28,43 @@ const SelectedCard: React.FC = () => {
     setSelected([]);
     showToast({
       type: "confirm",
-      title: "Adicionado",
+      title: "Removido",
       message: `${selected?.length} vídeos removidos da lista de download`,
       closable: true,
     });
   };
 
+  const formatDuration = (ms: number) => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (hours > 0) return `${hours}h ${minutes}min ${seconds}s`;
+    if (minutes > 0) return `${minutes}min ${seconds}s`;
+    return `${seconds}s`;
+  };
+
   //TODO: ORGANIZAR TUDO
   const handleDownloadSingle = async (videoItem: Partial<VideoItem>) => {
+    setLoading(true, `Baixando ${videoItem.title}`);
+    const startTime = Date.now();
     try {
       const link = `https://www.youtube.com/watch?v=${videoItem.id}`;
       await window.electronAPI.download([link]);
+      const endTime = Date.now();
+      const duration = formatDuration(endTime - startTime);
+      setLoading(false);
       return showToast({
         type: "confirm",
         title: videoItem.title,
-        message: `Download concluído`,
+        message: `Download concluído em ${duration}`,
         closable: true,
       });
     } catch (err: any) {
       const msg = err.message || err.toString();
       const cleanMsg = msg.split("Error:").pop().trim();
+      setLoading(false);
       return showToast({
         type: "error",
         title: "Erro ao baixar música",
@@ -53,65 +73,62 @@ const SelectedCard: React.FC = () => {
       });
     }
   };
-  //TODO: LOADING E CONTADOR DE MUSICAS JA BAIXADAS...
-  const handleDownloadAll = async (videoItem: Partial<VideoItem[]>) => {
-    let playlistLength = videoItem.length;
-    for (const video of videoItem) {
-      try {
-        const link = `https://www.youtube.com/watch?v=${video?.id}`;
-        await window.electronAPI.download([link]);
-        showToast({
-          type: "confirm",
-          title: video?.title,
-          message: `Baixado com sucesso`,
-          closable: true,
-        });
-      } catch (err: any) {
-        const msg = err.message || err.toString();
-        const cleanMsg = msg.split("Error:").pop().trim();
-        if (cleanMsg.includes("$(music) já foi baixada.")) {
-          showToast({
-            type: "error",
-            title: "Erro ao baixar música",
-            message: `${cleanMsg.replace("$(music)", video?.title)}`,
-            closable: true,
-          });
-          playlistLength -= 1;
-        }
-      }
-    }
-    if (playlistLength > 0)
+
+  const handleDownloadAll = async (videoItems: Partial<VideoItem[]>) => {
+    if (!videoItems.length) return;
+
+    const links = videoItems.map((v) => `https://www.youtube.com/watch?v=${v?.id}`);
+    setLoading(true, `Baixando ${links.length} músicas`);
+
+    const startTime = Date.now();
+
+    try {
+      await window.electronAPI.download(links);
+
+      const endTime = Date.now();
+      const duration = formatDuration(endTime - startTime);
+
       showToast({
         type: "confirm",
-        title: `Download concluído`,
-        message: `${playlistLength} músicas baixadas`,
+        title: "Download concluído",
+        message: `${links.length} músicas baixadas em ${duration}`,
         closable: true,
       });
+    } catch (err: any) {
+      showToast({
+        type: "error",
+        title: "Erro ao baixar músicas",
+        message: err.message || "Falha desconhecida",
+        closable: true,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!selected.length) return null;
   //TODO: ADICIONAR "... EM ITENS COM TITULO GRANDE E TOOLTIP (NO RESULT-CARD TBM)
   return (
-    <div className="space-y-2 border  border-redytb m-2 h-full w-full">
+    <div className="space-y-2 border border-redytb m-2 h-full w-full">
       <div className="flex items-center justify-between px-2 pt-2">
-        <h2 className="text-white text-xl font-bold pt-2 ml-2">
-          Vídeos selecionados para download ({selected.length})
-        </h2>
-        <h3
+        <h2 className="text-white text-xl font-bold">{`Vídeos selecionados para download (${selected.length})`}</h2>
+
+        <div
           onClick={handleExcludeAll}
           className="inline-flex items-center gap-2 text-white text-xl font-bold hover:text-redytb hover:underline underline-offset-4 transition-all duration-200 cursor-pointer select-none"
         >
           Remover tudo
           <CicrcleXIcon size={18} color="currentColor" />
-        </h3>
-        <h3
+        </div>
+        <button
           onClick={() => handleDownloadAll(selected)}
-          className="inline-flex items-center gap-2 text-white text-xl font-bold hover:text-redytb hover:underline underline-offset-4 transition-all duration-200 cursor-pointer select-none"
+          className="flex items-center gap-1 text-white text-lg font-bold hover:text-redytb hover:underline underline-offset-4 transition-all duration-200 cursor-pointer select-none"
         >
           Baixar Todos
           <ArrowBigDownDasIcon size={18} color="currentColor" />
-        </h3>
+        </button>
       </div>
+
       {selected.map((video, index) => (
         <div key={video.id} className="flex items-center space-x-3 p-2 hover:border border-redytb">
           <h1 className="text-white font-bold">{index + 1}</h1>
@@ -121,18 +138,21 @@ const SelectedCard: React.FC = () => {
             className="w-32 h-auto rounded"
           />
           <span className="text-white">{video.title}</span>
-          <XIcon
-            size={18}
-            color="#fff"
-            className="hover:cursor-pointer"
-            onClick={() => handleExclude(video)}
-          />
-          <ArrowDownToLineIcon
-            size={18}
-            color="#fff"
-            className="hover:cursor-pointer"
-            onClick={() => handleDownloadSingle(video)}
-          />
+
+          <div className="ml-auto flex items-center gap-2">
+            <XIcon
+              size={18}
+              color="#fff"
+              className="hover:cursor-pointer"
+              onClick={() => handleExclude(video)}
+            />
+            <ArrowDownToLineIcon
+              size={18}
+              color="#fff"
+              className="hover:cursor-pointer"
+              onClick={() => handleDownloadSingle(video)}
+            />
+          </div>
         </div>
       ))}
     </div>

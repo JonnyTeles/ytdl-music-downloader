@@ -1,4 +1,4 @@
 export type apiSearchType = {
-    type: 'name' | 'playlist'
-    query: string
-}
+  type: "name" | "playlist";
+  query: string;
+};

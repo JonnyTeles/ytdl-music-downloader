@@ -1,8 +1,9 @@
-import { BrowserWindow, ipcMain } from "electron";
+import { BrowserWindow, dialog, ipcMain } from "electron";
 import youtubesearchapi from "youtube-search-api";
-import { apiSearchType } from '../types/apiSearchType';
-import { extractPlaylistId } from "./utils";
+import { apiSearchType } from "../types/apiSearchType";
+import { extractPlaylistId, getFolderPath, store } from "./utils";
 import { downloadInWorker } from "./worker/downloadManager";
+const pLimit = require('p-limit');
 
 export function registerControlButtons() {
   ipcMain.handle("window-minimize", async (event) => {
@@ -27,9 +28,9 @@ export function registerControlButtons() {
 export function registerSearchHandler() {
   ipcMain.handle("search", async (_event, payload: apiSearchType) => {
     const { query, type } = payload;
-    if (type === 'name') {
+    if (type === "name") {
       return await youtubesearchapi.GetListByKeyword(query, false, 500, [{ type: "video" }]);
-    } else if (type === 'playlist') {
+    } else if (type === "playlist") {
       const playlistId = extractPlaylistId(query);
       return await youtubesearchapi.GetPlaylistData(playlistId, 500);
     } else {
@@ -37,18 +38,48 @@ export function registerSearchHandler() {
     }
   });
 }
+
 export function downloadHandler() {
   ipcMain.handle("download", async (_event, links: string[]) => {
-    try {
-      for (const link of links) {
-        await downloadInWorker(link);
-      }
-      return { success: true };
-    } catch (err: any) {
-      console.error(err);
-      if (err.message.includes("Output file already exists"))
-        throw new Error("$(music) já foi baixada.");
-      throw new Error("Falha ao baixar músicas.");
+    const limit = pLimit(5);
+
+    const tasks = links.map(link =>
+      limit(async () => {
+        try {
+          await downloadInWorker(link);
+        } catch (err: any) {
+          if (err.message.includes("Call to iTunes API did not return any results")) return;
+          if (err.message.includes("Output file already exists")) return;
+          console.error(err);
+          throw new Error("Falha ao baixar músicas.");
+        }
+      })
+    );
+
+    await Promise.all(tasks);
+
+    return { success: true };
+  });
+}
+
+export function handleGetFolderPath() {
+  ipcMain.handle("get-folder-path", async (_event) => {
+    return getFolderPath();
+  });
+}
+
+export function handleSelectFolder(mainWindow: BrowserWindow) {
+  ipcMain.handle("select-folder", async () => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: "Selecione a pasta",
+      properties: ["openDirectory"]
+    });
+    let path = getFolderPath();
+    if (result.canceled) return path;
+    if (result.filePaths[0]) {
+      store.set("downloadPath", result.filePaths[0]);
+      return result.filePaths[0];
     }
+    return path;
   });
 }

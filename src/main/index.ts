@@ -4,21 +4,28 @@ import { electronApp, is, optimizer } from "@electron-toolkit/utils";
 import * as path from "path";
 import * as fs from "fs";
 import * as dotenv from "dotenv";
-import { downloadHandler, registerControlButtons, registerSearchHandler } from "./ipcHandler";
+import {
+  downloadHandler,
+  handleGetFolderPath,
+  handleSelectFolder,
+  registerControlButtons,
+  registerSearchHandler,
+} from "./ipcHandler";
+import { initDownloadPath } from "./utils";
 const envPath = path.join(process.cwd(), ".env");
 dotenv.config({ path: envPath });
-process.env.YTDL_NO_UPDATE = '1';
+process.env.YTDL_NO_UPDATE = "1";
 
 //TODO AJEITAR ICON
-const assetsDir = path.join(__dirname, '../renderer/assets');
-const icoFile = fs.readdirSync(assetsDir).find((file) => file.endsWith('.ico'));
+const assetsDir = path.join(__dirname, "./../../build");
+const icoFile = fs.readdirSync(assetsDir).find((file) => file.endsWith(".ico"));
 const iconPath = icoFile ? path.join(assetsDir, icoFile) : undefined;
-const downloadFolder = path.join(__dirname, 'Musics');
 
+let mainWindow: BrowserWindow;
 function createWindow(): void {
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     title: "Youtub Music Downloader",
-    icon: iconPath || undefined,
+    icon: iconPath,
     width: 900,
     height: 670,
     show: false,
@@ -27,6 +34,7 @@ function createWindow(): void {
     webPreferences: {
       preload: join(__dirname, "../preload/index.js"),
       sandbox: false,
+      contextIsolation: true,
     },
   });
 
@@ -51,10 +59,13 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window);
   });
 
+  initDownloadPath();
   createWindow();
   registerControlButtons();
   registerSearchHandler();
   downloadHandler();
+  handleGetFolderPath();
+  handleSelectFolder(mainWindow);
 
   app.on("activate", function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -68,12 +79,6 @@ app.on("will-quit", () => {
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
-  }
-});
-
-app.on("ready", () => {
-  if (!fs.existsSync(downloadFolder)) {
-    fs.mkdirSync(downloadFolder, { recursive: true });
   }
 });
 
