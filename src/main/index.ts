@@ -18,9 +18,8 @@ const envPath = path.join(process.cwd(), ".env");
 dotenv.config({ path: envPath });
 process.env.YTDL_NO_UPDATE = "1";
 
-//TODO AJEITAR ICON
-const assetsDir = path.join(__dirname, "./../../build");
-const icoFile = fs.readdirSync(assetsDir).find((file) => file.endsWith(".ico"));
+const assetsDir = path.join(__dirname, '../renderer/assets');
+const icoFile = fs.readdirSync(assetsDir).find(file => file.endsWith('.ico'));
 const iconPath = icoFile ? path.join(assetsDir, icoFile) : undefined;
 
 let mainWindow: BrowserWindow;

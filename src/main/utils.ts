@@ -1,7 +1,8 @@
-import { exec } from "child_process";
 import { app, shell } from "electron";
 import Store from "electron-store";
 export const store = new Store();
+import { appendFile } from "fs";
+import { join } from "path";
 
 export function extractPlaylistId(url: string): string {
   const match = url.match(/[?&]list=([^&]+)/);
@@ -42,12 +43,18 @@ export const openFolder = async () => {
 
   const shouldOpen = getOpenFolder();
   if (!shouldOpen) return;
-
-  // tenta focar a janela do Explorer se já estiver aberta
-  if (process.platform === "win32") {
-    exec(`explorer /select,"${folderPath}"`);
-  } else {
-    // macOS ou Linux apenas abre normalmente
-    await shell.openPath(folderPath);
-  }
+  return shell.openExternal(folderPath);
 };
+
+const logFilePath = join(app.getPath("userData"), "error.log");
+
+export function logError(message: string): void {
+  const timestamp = new Date().toISOString();
+  const logMessage = `[${timestamp}] ${message}\n`;
+
+  appendFile(logFilePath, logMessage, (err) => {
+    if (err) {
+      console.error("Erro ao escrever no log:", err);
+    }
+  });
+}

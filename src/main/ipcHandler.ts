@@ -1,7 +1,7 @@
 import { BrowserWindow, dialog, ipcMain } from "electron";
 import youtubesearchapi from "youtube-search-api";
 import { apiSearchType } from "../types/apiSearchType";
-import { extractPlaylistId, getFolderPath, getOpenFolder, openFolder, store } from "./utils";
+import { extractPlaylistId, getFolderPath, getOpenFolder, logError, openFolder, store } from "./utils";
 import { downloadInWorker } from "./worker/downloadManager";
 const pLimit = require('p-limit');
 
@@ -47,13 +47,13 @@ export function downloadHandler(mainWindow: BrowserWindow) {
       limit(async () => {
         try {
           await downloadInWorker(link);
-          //  mainWindow.webContents.send("download-progress", { link });
         } catch (err: any) {
           if (
             err.message.includes("Call to iTunes API did not return any results") ||
             err.message.includes("Output file already exists")
           ) return;
           console.error(err);
+          logError(err);
           throw new Error("Falha ao baixar músicas.");
         } finally {
           mainWindow.webContents.send("download-progress", { link });

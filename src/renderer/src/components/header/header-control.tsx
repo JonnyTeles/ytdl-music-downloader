@@ -1,5 +1,5 @@
 import ControlButtons from "./control-buttons";
-import imagePath from "../../assets/icon.png";
+import imagePath from "../../assets/icon.ico";
 
 const HeaderControl: React.FC = () => (
   <div
