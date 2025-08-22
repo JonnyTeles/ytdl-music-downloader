@@ -11,6 +11,8 @@ declare global {
       download: (link: string[]) => Promise<any>;
       selectFolder: () => Promise<string>;
       getFolderPath: () => Promise<string>;
+      setOpenFolder: (open: boolean) => Promise<void>;
+      getOpenFolder: () => Promise<boolean>;
     };
   }
 }

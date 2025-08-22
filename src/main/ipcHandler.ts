@@ -1,7 +1,7 @@
 import { BrowserWindow, dialog, ipcMain } from "electron";
 import youtubesearchapi from "youtube-search-api";
 import { apiSearchType } from "../types/apiSearchType";
-import { extractPlaylistId, getFolderPath, store } from "./utils";
+import { extractPlaylistId, getFolderPath, getOpenFolder, openFolder, store } from "./utils";
 import { downloadInWorker } from "./worker/downloadManager";
 const pLimit = require('p-limit');
 
@@ -57,6 +57,7 @@ export function downloadHandler() {
     );
 
     await Promise.all(tasks);
+    openFolder();
 
     return { success: true };
   });
@@ -81,5 +82,17 @@ export function handleSelectFolder(mainWindow: BrowserWindow) {
       return result.filePaths[0];
     }
     return path;
+  });
+}
+
+export function handleGetOpenFolder() {
+  ipcMain.handle("get-open-folder", async (_event) => {
+    return getOpenFolder();
+  });
+}
+
+export function handleOpenFolder() {
+  ipcMain.handle("set-open-folder", (_event, open: boolean) => {
+    return store.set('openFolder', open);
   });
 }

@@ -8,5 +8,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   search: (apiSearchType: apiSearchType) => ipcRenderer.invoke("search", apiSearchType),
   download: (link: string[]) => ipcRenderer.invoke("download", link),
   selectFolder: () => ipcRenderer.invoke("select-folder"),
-  getFolderPath: () => ipcRenderer.invoke("get-folder-path")
+  getFolderPath: () => ipcRenderer.invoke("get-folder-path"),
+  getOpenFolder: () => ipcRenderer.invoke("get-open-folder"),
+  setOpenFolder: (open: boolean) => ipcRenderer.invoke("set-open-folder", open)
 });

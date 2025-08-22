@@ -7,11 +7,13 @@ import * as dotenv from "dotenv";
 import {
   downloadHandler,
   handleGetFolderPath,
+  handleGetOpenFolder,
+  handleOpenFolder,
   handleSelectFolder,
   registerControlButtons,
   registerSearchHandler,
 } from "./ipcHandler";
-import { initDownloadPath } from "./utils";
+import { initDownloadPath, initOpenFolder } from "./utils";
 const envPath = path.join(process.cwd(), ".env");
 dotenv.config({ path: envPath });
 process.env.YTDL_NO_UPDATE = "1";
@@ -60,12 +62,15 @@ app.whenReady().then(() => {
   });
 
   initDownloadPath();
+  initOpenFolder();
   createWindow();
   registerControlButtons();
   registerSearchHandler();
   downloadHandler();
   handleGetFolderPath();
   handleSelectFolder(mainWindow);
+  handleOpenFolder();
+  handleGetOpenFolder();
 
   app.on("activate", function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
