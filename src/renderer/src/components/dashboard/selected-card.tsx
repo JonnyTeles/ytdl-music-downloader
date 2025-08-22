@@ -8,11 +8,25 @@ import { useSelected } from "./context/selected-context";
 import { VideoItem } from "src/types/videoItem";
 import { useToast } from "../toast/toast-context";
 import { useLoading } from "../loading/loading-context";
+import { useEffect } from "react";
 //TODO CRIAR HOOK PRA ORGANIZAR
 const SelectedCard: React.FC = () => {
   const { selected, setSelected } = useSelected();
   const { showToast } = useToast();
   const { setLoading } = useLoading();
+
+  useEffect(() => {
+    let done = 0;
+
+    const handler = () => {
+      done += 1;
+      const total = selected.length;
+      setLoading(true, `Baixando músicas...`, { done, total });
+    };
+
+    window.electronAPI.onDownloadProgress(handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected]);
 
   const handleExclude = (video: VideoItem) => {
     setSelected((prevSelected) => prevSelected.filter((v) => v.id !== video.id));
@@ -78,7 +92,7 @@ const SelectedCard: React.FC = () => {
     if (!videoItems.length) return;
 
     const links = videoItems.map((v) => `https://www.youtube.com/watch?v=${v?.id}`);
-    setLoading(true, `Baixando ${links.length} músicas`);
+    setLoading(true, `Baixando ${links.length} músicas`, { done: 0, total: links.length });
 
     const startTime = Date.now();
 
@@ -105,7 +119,6 @@ const SelectedCard: React.FC = () => {
       setLoading(false);
     }
   };
-
   if (!selected.length) return null;
   //TODO: ADICIONAR "... EM ITENS COM TITULO GRANDE E TOOLTIP (NO RESULT-CARD TBM)
   return (

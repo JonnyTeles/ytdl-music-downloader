@@ -10,5 +10,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   selectFolder: () => ipcRenderer.invoke("select-folder"),
   getFolderPath: () => ipcRenderer.invoke("get-folder-path"),
   getOpenFolder: () => ipcRenderer.invoke("get-open-folder"),
-  setOpenFolder: (open: boolean) => ipcRenderer.invoke("set-open-folder", open)
+  setOpenFolder: (open: boolean) => ipcRenderer.invoke("set-open-folder", open),
+  onDownloadProgress: (callback: (data: { link: string }) => void) => {
+    ipcRenderer.on("download-progress", (_event, data) => callback(data));
+  },
 });

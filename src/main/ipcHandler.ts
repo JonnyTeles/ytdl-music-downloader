@@ -39,7 +39,7 @@ export function registerSearchHandler() {
   });
 }
 
-export function downloadHandler() {
+export function downloadHandler(mainWindow: BrowserWindow) {
   ipcMain.handle("download", async (_event, links: string[]) => {
     const limit = pLimit(5);
 
@@ -47,11 +47,16 @@ export function downloadHandler() {
       limit(async () => {
         try {
           await downloadInWorker(link);
+          //  mainWindow.webContents.send("download-progress", { link });
         } catch (err: any) {
-          if (err.message.includes("Call to iTunes API did not return any results")) return;
-          if (err.message.includes("Output file already exists")) return;
+          if (
+            err.message.includes("Call to iTunes API did not return any results") ||
+            err.message.includes("Output file already exists")
+          ) return;
           console.error(err);
           throw new Error("Falha ao baixar músicas.");
+        } finally {
+          mainWindow.webContents.send("download-progress", { link });
         }
       })
     );

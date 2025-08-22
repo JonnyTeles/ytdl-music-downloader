@@ -13,6 +13,7 @@ declare global {
       getFolderPath: () => Promise<string>;
       setOpenFolder: (open: boolean) => Promise<void>;
       getOpenFolder: () => Promise<boolean>;
+      onDownloadProgress: (callback: (data: { link: string }) => void) => void;
     };
   }
 }

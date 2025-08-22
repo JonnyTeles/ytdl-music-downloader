@@ -1,3 +1,4 @@
+import { exec } from "child_process";
 import { app, shell } from "electron";
 import Store from "electron-store";
 export const store = new Store();
@@ -20,7 +21,7 @@ export const initOpenFolder = () => {
   let openFolder = store.get("openFolder") as boolean | undefined;
 
   if (!openFolder) {
-    store.set("downloadPath", false);
+    store.set("openFolder", false);
   }
 };
 
@@ -42,5 +43,11 @@ export const openFolder = async () => {
   const shouldOpen = getOpenFolder();
   if (!shouldOpen) return;
 
-  await shell.openPath(folderPath);
+  // tenta focar a janela do Explorer se já estiver aberta
+  if (process.platform === "win32") {
+    exec(`explorer /select,"${folderPath}"`);
+  } else {
+    // macOS ou Linux apenas abre normalmente
+    await shell.openPath(folderPath);
+  }
 };

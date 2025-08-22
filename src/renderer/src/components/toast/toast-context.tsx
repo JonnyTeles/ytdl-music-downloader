@@ -8,36 +8,35 @@ type ToastContextType = {
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
-let toastId = 0;
-
 export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [toasts, setToasts] = useState<ToastData[]>([]);
+  const [toast, setToast] = useState<Omit<ToastData, "id"> | null>(null);
+  const [key, setKey] = useState(0);
 
   const showToast = useCallback((data: Omit<ToastData, "id">) => {
-    toastId++;
-    const id = toastId;
-    setToasts((prev) => [...prev, { ...data, id }]);
+    setToast(null);
+    setTimeout(() => {
+      setToast(data);
+      setKey((prev) => prev + 1);
+    }, 50);
   }, []);
 
-  const removeToast = useCallback((id: number) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, []);
+  const handleClose = () => setToast(null);
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col space-y-2">
-        {toasts.map(({ id, type, title, message, closable }) => (
+      {toast && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
           <Toast
-            key={id}
-            type={type}
-            title={title}
-            message={message}
-            closable={closable}
-            onClose={() => removeToast(id)}
+            key={key}
+            type={toast.type}
+            title={toast.title}
+            message={toast.message}
+            closable={toast.closable ?? true}
+            onClose={handleClose}
           />
-        ))}
-      </div>
+        </div>
+      )}
     </ToastContext.Provider>
   );
 };
