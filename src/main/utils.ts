@@ -1,7 +1,7 @@
 import { app, shell } from "electron";
 import Store from "electron-store";
 export const store = new Store();
-import { appendFile } from "fs";
+import { appendFile, mkdirSync } from "fs";
 import { join } from "path";
 
 export function extractPlaylistId(url: string): string {
@@ -46,15 +46,26 @@ export const openFolder = async () => {
   return shell.openExternal(folderPath);
 };
 
-const logFilePath = join(app.getPath("userData"), "error.log");
+const logsDir = join(app.getPath("userData"), "logs");
+mkdirSync(logsDir, { recursive: true });
 
-export function logError(message: string): void {
+const logFilePath = join(logsDir, "error.log");
+
+export function logError(err: any): void {
   const timestamp = new Date().toISOString();
+  let message = "";
+
+  if (err instanceof Error) {
+    message = err.stack || err.message;
+  } else {
+    message = String(err);
+  }
+
   const logMessage = `[${timestamp}] ${message}\n`;
 
-  appendFile(logFilePath, logMessage, (err) => {
-    if (err) {
-      console.error("Erro ao escrever no log:", err);
+  appendFile(logFilePath, logMessage, (writeErr) => {
+    if (writeErr) {
+      console.error("Erro ao escrever no log:", writeErr);
     }
   });
 }

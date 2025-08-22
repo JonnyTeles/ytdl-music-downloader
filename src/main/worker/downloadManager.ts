@@ -1,10 +1,19 @@
 import path from "path";
 import { Worker } from "worker_threads";
 import { store } from "../utils";
+import { app } from "electron";
+
+function getWorkerPath(): string {
+  if (app.isPackaged) {
+    return path.join(process.resourcesPath, 'app.asar.unpacked', 'out', 'main', 'worker', 'worker.js');
+  }
+  return path.resolve(__dirname, 'worker', 'worker.js');
+}
 
 export function downloadInWorker(link: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    const worker = new Worker(path.resolve(__dirname, "worker/worker.js"));
+    const workerPath = getWorkerPath();
+    const worker = new Worker(workerPath);
 
     worker.postMessage({ type: "init", path: store.get("downloadPath") });
     worker.postMessage(link);
